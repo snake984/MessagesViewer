@@ -1,19 +1,21 @@
 package com.messagesviewer.remote.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.messagesviewer.remote.db.model.UserEntity
 
 @Dao
-interface UserDao {
+abstract class UserDao {
     @Query("SELECT * FROM users")
-    fun getUser(): List<UserEntity>
+    abstract fun getUsers(): List<UserEntity>
 
     @Query("SELECT * FROM users WHERE id IS :userId")
-    fun getUser(userId: Long): UserEntity
+    abstract fun getUser(userId: Long): UserEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun saveUser(userEntity: UserEntity)
+    abstract fun saveUser(userEntity: UserEntity)
+
+    @Transaction
+    open fun saveUsers(users: List<UserEntity>) {
+        users.forEach { saveUser(it) }
+    }
 }
