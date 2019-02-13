@@ -1,20 +1,22 @@
 package com.messagesviewer.remote.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.messagesviewer.remote.db.model.AttachmentEntity
 
 @Dao
-interface AttachmentDao {
+abstract class AttachmentDao {
 
     @Query("SELECT * FROM attachments")
-    fun getAttachments(): List<AttachmentEntity>
+    abstract fun getAttachments(): List<AttachmentEntity>
 
     @Query("SELECT * FROM attachments WHERE messageId IS :messageId")
-    fun getAttachments(messageId: Long): List<AttachmentEntity>
+    abstract fun getAttachments(messageId: Long): List<AttachmentEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun saveAttachment(attachmentEntity: AttachmentEntity)
+    abstract fun saveAttachment(attachmentEntity: AttachmentEntity)
+
+    @Transaction
+    open fun saveAttachments(attachments: List<AttachmentEntity>) {
+        attachments.forEach { saveAttachment(it) }
+    }
 }

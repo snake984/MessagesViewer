@@ -6,6 +6,6 @@ import kotlinx.coroutines.Job
 import java.io.InputStream
 
 interface MessageRepository {
-    fun fetchMessages(userId: Long): Deferred<List<Message>>
-    fun importMessages(source: InputStream): Job
+    suspend fun fetchMessages(): Deferred<List<Message>>
+    suspend fun importMessages(source: InputStream): Job
 }

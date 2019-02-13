@@ -2,6 +2,7 @@ package com.messagesviewer.domain.repositories
 
 import com.messagesviewer.application.MessagesViewerApplication
 import com.messagesviewer.domain.model.User
+import com.messagesviewer.remote.db.dao.UserDao
 import com.messagesviewer.remote.db.dao.UserDao_Impl
 import com.messagesviewer.remote.db.model.UserEntity
 import com.messagesviewer.remote.util.LocalSourceHelper
@@ -10,9 +11,9 @@ import java.io.InputStream
 
 class UserRepositoryImpl : UserRepository {
     private val localSourceHelper = LocalSourceHelper()
-    private val userDao = UserDao_Impl(MessagesViewerApplication.database)
+    private val userDao: UserDao = UserDao_Impl(MessagesViewerApplication.database)
 
-    override fun fetchUsers(): Deferred<List<User>> =
+    override suspend fun fetchUsers(): Deferred<List<User>> =
         CoroutineScope(Dispatchers.IO).async {
             userDao.getUsers()
                 .map {
@@ -24,7 +25,7 @@ class UserRepositoryImpl : UserRepository {
                 }
         }
 
-    override fun importUsers(source: InputStream) =
+    override suspend fun importUsers(source: InputStream) =
         CoroutineScope(Dispatchers.IO).launch {
             userDao.saveUsers(
                 localSourceHelper.parseUsers(source)

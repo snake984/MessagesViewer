@@ -2,7 +2,9 @@ package com.messagesviewer.domain.repositories
 
 import com.messagesviewer.application.MessagesViewerApplication
 import com.messagesviewer.domain.model.Message
+import com.messagesviewer.remote.db.dao.MessageDao
 import com.messagesviewer.remote.db.dao.MessageDao_Impl
+import com.messagesviewer.remote.db.model.MessageEntity
 import com.messagesviewer.remote.util.LocalSourceHelper
 import kotlinx.coroutines.*
 import java.io.InputStream
@@ -10,12 +12,12 @@ import java.io.InputStream
 class MessageRepositoryImpl : MessageRepository {
 
     private val localSourceHelper = LocalSourceHelper()
-    private val messageDao = MessageDao_Impl(MessagesViewerApplication.database)
-    private val attachmentRepository = AttachmentRepositoryImpl()
+    private val messageDao: MessageDao = MessageDao_Impl(MessagesViewerApplication.database)
+    private val attachmentRepository: AttachmentRepository = AttachmentRepositoryImpl()
 
-    override fun fetchMessages(userId: Long): Deferred<List<Message>> =
+    override suspend fun fetchMessages(): Deferred<List<Message>> =
         CoroutineScope(Dispatchers.IO).async {
-            messageDao.getMessages(userId)
+            messageDao.getMessages()
                 .map {
                     Message(
                         id = it.id,
@@ -26,9 +28,23 @@ class MessageRepositoryImpl : MessageRepository {
                 }
         }
 
-    override fun importMessages(source: InputStream): Job =
+    override suspend fun importMessages(source: InputStream): Job =
         CoroutineScope(Dispatchers.IO).launch {
             localSourceHelper.parseMessages(source)
+                .forEach {
+                    messageDao.saveMessage(mapMessageToEntity(it))
+                    attachmentRepository.saveAttachments(
+                        it.id,
+                        it.attachments
+                    )
+                }
         }
+
+    private fun mapMessageToEntity(message: Message): MessageEntity =
+        MessageEntity(
+            id = message.id,
+            userId = message.userId,
+            content = message.content
+        )
 
 }

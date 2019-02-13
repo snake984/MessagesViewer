@@ -6,6 +6,6 @@ import kotlinx.coroutines.Job
 import java.io.InputStream
 
 interface UserRepository {
-    fun fetchUsers(): Deferred<List<User>>
-    fun importUsers(source: InputStream): Job
+    suspend fun fetchUsers(): Deferred<List<User>>
+    suspend fun importUsers(source: InputStream): Job
 }
