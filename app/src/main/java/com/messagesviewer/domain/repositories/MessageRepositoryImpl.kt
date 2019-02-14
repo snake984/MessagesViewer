@@ -14,10 +14,11 @@ class MessageRepositoryImpl : MessageRepository {
     private val localSourceHelper = LocalSourceHelper()
     private val messageDao: MessageDao = MessageDao_Impl(MessagesViewerApplication.database)
     private val attachmentRepository: AttachmentRepository = AttachmentRepositoryImpl()
+    private var currentPage = 0
 
-    override suspend fun fetchMessages(): Deferred<List<Message>> =
+    override suspend fun fetchMessages(pageSize: Int): Deferred<List<Message>> =
         CoroutineScope(Dispatchers.IO).async {
-            messageDao.getMessages()
+            messageDao.getMessages(currentPage * pageSize, pageSize)
                 .map {
                     Message(
                         id = it.id,
@@ -25,7 +26,7 @@ class MessageRepositoryImpl : MessageRepository {
                         content = it.content,
                         attachments = attachmentRepository.fetchAttachments(it.id).await()
                     )
-                }
+                }.also { currentPage++ }
         }
 
     override suspend fun importMessages(source: InputStream): Job =
@@ -46,5 +47,4 @@ class MessageRepositoryImpl : MessageRepository {
             userId = message.userId,
             content = message.content
         )
-
 }

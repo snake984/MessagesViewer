@@ -20,7 +20,7 @@ class UserRepositoryImpl : UserRepository {
                     User(
                         id = it.id,
                         name = it.name,
-                        avatarId = it.avatarId
+                        avatarUrl = it.avatarUrl
                     )
                 }
         }
@@ -33,7 +33,7 @@ class UserRepositoryImpl : UserRepository {
                         UserEntity(
                             id = it.id,
                             name = it.name,
-                            avatarId = it.avatarId
+                            avatarUrl = it.avatarUrl
                         )
                     }
             )

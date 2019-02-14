@@ -32,6 +32,10 @@ dependencies {
     def lifecycle_version = "2.0.0"
     def room_version = "2.1.0-alpha04"
 
+    def paging_version = "2.1.0"
+
+
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
@@ -42,6 +46,7 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$room_version"
     kapt "android.arch.persistence.room:compiler:$room_version"
     implementation "androidx.room:room-coroutines:$room_version"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
 
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
@@ -62,6 +67,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.+'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
     testImplementation "com.google.truth:truth:0.+"
+    testImplementation "androidx.paging:paging-common-ktx:$paging_version" // For Kotlin use paging-common-ktx
 
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'

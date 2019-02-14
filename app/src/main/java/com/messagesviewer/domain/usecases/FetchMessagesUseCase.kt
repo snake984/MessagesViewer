@@ -15,7 +15,7 @@ class FetchMessagesUseCase {
         try {
             Result.Data(
                 userRepository.fetchUsers().await(),
-                messagesRepository.fetchMessages().await()
+                messagesRepository.fetchMessages(HITS_BY_PAGE).await().sortedBy { it.id }
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -25,5 +25,9 @@ class FetchMessagesUseCase {
     sealed class Result {
         data class Data(val users: List<User>, val messages: List<Message>) : Result()
         data class Error(val throwable: Throwable) : Result()
+    }
+
+    companion object {
+        const val HITS_BY_PAGE = 20
     }
 }

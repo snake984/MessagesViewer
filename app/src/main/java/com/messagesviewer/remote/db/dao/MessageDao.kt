@@ -6,11 +6,8 @@ import com.messagesviewer.remote.db.model.MessageEntity
 @Dao
 abstract class MessageDao {
 
-    @Query("SELECT * FROM messages")
-    abstract fun getMessages(): List<MessageEntity>
-
-    @Query("SELECT * FROM messages WHERE userId IS :userId")
-    abstract fun getMessages(userId: Long): List<MessageEntity>
+    @Query("SELECT * FROM messages LIMIT :startRow, :hitsNbr")
+    abstract fun getMessages(startRow: Int, hitsNbr: Int): List<MessageEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun saveMessage(messageEntity: MessageEntity)
