@@ -18,14 +18,15 @@
             android:id="@+id/myUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:padding="4dp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/myMessageContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:paddingBottom="4dp" />
     </LinearLayout>
 
