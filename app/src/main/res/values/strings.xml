@@ -3,4 +3,8 @@
     <string name="something_wrong_happened">Something wrong happened</string>
     <string name="no_messages_found">No messages found</string>
     <string name="me">Me</string>
+    <string name="delete_message_title">Delete message</string>
+    <string name="delete_message_label">Are you sure you want to delete this message?</string>
+    <string name="delete_attachment_title">Delete Attachment</string>
+    <string name="delete_attachment_label">Are you sure you want to delete this attachment?</string>
 </resources>

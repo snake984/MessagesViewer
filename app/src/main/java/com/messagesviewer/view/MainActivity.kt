@@ -3,6 +3,7 @@ package com.messagesviewer.view
 import android.os.Bundle
 import android.os.Parcelable
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -18,6 +19,7 @@ import com.messagesviewer.view.util.show
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
 
+
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -29,10 +31,11 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     private lateinit var sharedPrefHelper: SharedPrefHelper
     private val messagesAdapter = MessagesAdapter(
         onMessageLongClick = {
-            mainViewModel.onMessageLongClick(it)
+            showDeleteMessageConfirmationDialog(it)
+
         },
         onAttachmentLongClick = {
-            mainViewModel.onAttachmentLongClick(it)
+            showDeleteAttachmentConfirmationDialog(it)
         }
     )
 
@@ -125,6 +128,28 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
             val messageItem = state.messages.find { it.attachments.contains(attachmentItem) }
             messageItem?.attachments?.remove(attachmentItem)
         })
+    }
+
+    private fun showDeleteMessageConfirmationDialog(messageItem: MessageItem) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.delete_message_title))
+            .setMessage(getString(R.string.delete_message_label))
+            .setPositiveButton(android.R.string.yes) { _, _ ->
+                mainViewModel.deleteMessage(messageItem)
+            }
+            .setNegativeButton(android.R.string.no) { _, _ -> Unit }
+            .show()
+    }
+
+    private fun showDeleteAttachmentConfirmationDialog(attachmentItem: AttachmentItem) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.delete_attachment_title))
+            .setMessage(getString(R.string.delete_attachment_label))
+            .setPositiveButton(android.R.string.yes) { _, _ ->
+                mainViewModel.deleteAttachment(attachmentItem)
+            }
+            .setNegativeButton(android.R.string.no) { _, _ -> Unit }
+            .show()
     }
 
     @Parcelize

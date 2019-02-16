@@ -121,7 +121,7 @@ class MainViewModel : ViewModel() {
         clear()
     }
 
-    fun onMessageLongClick(message: MessageItem) {
+    fun deleteMessage(message: MessageItem) {
         dispose()
         jobs.add(
             CoroutineScope(Dispatchers.IO).launch {
@@ -137,7 +137,7 @@ class MainViewModel : ViewModel() {
         )
     }
 
-    fun onAttachmentLongClick(attachment: AttachmentItem) {
+    fun deleteAttachment(attachment: AttachmentItem) {
         dispose()
         jobs.add(
             CoroutineScope(Dispatchers.IO).launch {
