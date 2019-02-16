@@ -7,7 +7,7 @@ import com.messagesviewer.domain.repositories.MessageRepositoryImpl
 class DeleteMessageUseCase {
     private val messageRepository: MessageRepository = MessageRepositoryImpl()
 
-    suspend fun deleteMessage(message: Message): Result =
+    suspend fun run(message: Message): Result =
         try {
             messageRepository.deleteMessage(message)
             Result.Success

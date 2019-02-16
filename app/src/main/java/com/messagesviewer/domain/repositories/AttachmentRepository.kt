@@ -6,8 +6,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 
 interface AttachmentRepository {
-    fun fetchAttachments(message: Long): Deferred<List<Attachment>>
-    fun saveAttachments(messageId: Long, attachments: List<Attachment>): Job
-    fun deleteAttachment(attachment: Attachment): Job
-    fun deleteAttachments(message: Message): Job
+    suspend fun fetchAttachments(messageId: Long): Deferred<List<Attachment>>
+    suspend fun saveAttachments(messageId: Long, attachments: List<Attachment>): Job
+    suspend fun deleteAttachment(attachment: Attachment): Job
+    suspend fun deleteAttachments(message: Message): Job
 }

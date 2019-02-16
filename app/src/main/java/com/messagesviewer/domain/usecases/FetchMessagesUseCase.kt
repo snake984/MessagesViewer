@@ -11,7 +11,7 @@ class FetchMessagesUseCase {
     private val messagesRepository: MessageRepository = MessageRepositoryImpl()
     private val userRepository: UserRepository = UserRepositoryImpl()
 
-    suspend fun fetchMessages(): Result =
+    suspend fun run(): Result =
         try {
             Result.Data(
                 userRepository.fetchUsers().await(),

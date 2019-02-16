@@ -7,7 +7,7 @@ import com.messagesviewer.domain.repositories.AttachmentRepositoryImpl
 class DeleteAttachmentUseCase {
     private val attachmentRepository: AttachmentRepository = AttachmentRepositoryImpl()
 
-    fun deleteAttachment(attachment: Attachment) =
+    suspend fun run(attachment: Attachment) =
         try {
             attachmentRepository.deleteAttachment(attachment)
             Result.Success

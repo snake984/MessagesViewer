@@ -42,7 +42,7 @@ class MainViewModel : ViewModel() {
         dispose()
         jobs.add(CoroutineScope(Dispatchers.IO).launch {
             _isLoading.postValue(true)
-            val result = importDataUseCase.import(dataSourceFromRawFile)
+            val result = importDataUseCase.run(dataSourceFromRawFile)
 
             when (result) {
                 is ImportDataUseCase.Result.Success -> fetchMessages()
@@ -59,7 +59,7 @@ class MainViewModel : ViewModel() {
         dispose()
         jobs.add(CoroutineScope(Dispatchers.IO).launch {
             _isLoading.postValue(true)
-            val result = fetchMessagesUseCase.fetchMessages()
+            val result = fetchMessagesUseCase.run()
 
             _isLoading.postValue(false)
             when (result) {
@@ -126,7 +126,7 @@ class MainViewModel : ViewModel() {
         jobs.add(
             CoroutineScope(Dispatchers.IO).launch {
                 _isLoading.postValue(true)
-                val result = deleteMessageUseCase.deleteMessage(mapToMessage(message))
+                val result = deleteMessageUseCase.run(mapToMessage(message))
                 _isLoading.postValue(false)
 
                 when (result) {
@@ -142,7 +142,7 @@ class MainViewModel : ViewModel() {
         jobs.add(
             CoroutineScope(Dispatchers.IO).launch {
                 _isLoading.postValue(true)
-                val result = deleteAttachmentUseCase.deleteAttachment(mapToAttachment(attachment))
+                val result = deleteAttachmentUseCase.run(mapToAttachment(attachment))
                 _isLoading.postValue(false)
 
                 when (result) {

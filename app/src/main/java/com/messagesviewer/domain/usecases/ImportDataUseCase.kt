@@ -12,7 +12,7 @@ class ImportDataUseCase {
     private val messageRepository: MessageRepository = MessageRepositoryImpl()
     private val localSourceHelper = LocalSourceHelper()
 
-    suspend fun import(source: InputStream): Result =
+    suspend fun run(source: InputStream): Result =
         try {
             val parsedData = localSourceHelper.parseMessages(source)
             userRepository.importUsers(parsedData.users)

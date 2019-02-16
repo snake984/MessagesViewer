@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 class AttachmentRepositoryImpl : AttachmentRepository {
     private val attachmentDao: AttachmentDao = AttachmentDao_Impl(MessagesViewerApplication.database)
 
-    override fun fetchAttachments(messageId: Long) =
+    override suspend fun fetchAttachments(messageId: Long) =
         runBlocking {
             async {
                 attachmentDao.getAttachments(messageId)
@@ -29,7 +29,7 @@ class AttachmentRepositoryImpl : AttachmentRepository {
             }
         }
 
-    override fun saveAttachments(messageId: Long, attachments: List<Attachment>): Job =
+    override suspend fun saveAttachments(messageId: Long, attachments: List<Attachment>): Job =
         runBlocking {
             launch {
                 attachmentDao.saveAttachments(
@@ -46,14 +46,14 @@ class AttachmentRepositoryImpl : AttachmentRepository {
             }
         }
 
-    override fun deleteAttachment(attachment: Attachment): Job =
+    override suspend fun deleteAttachment(attachment: Attachment): Job =
         runBlocking {
             launch {
                 attachmentDao.deleteAttachment(attachment.id)
             }
         }
 
-    override fun deleteAttachments(message: Message): Job =
+    override suspend fun deleteAttachments(message: Message): Job =
         runBlocking {
             launch {
                 attachmentDao.deleteAttachments(message.id)

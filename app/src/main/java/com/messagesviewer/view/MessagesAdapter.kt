@@ -83,10 +83,9 @@ class MessagesAdapter(
                 MY_MESSAGES_VIEW_TYPE -> {
                     itemView.myUserName.text = itemView.context.getText(R.string.me)
                     itemView.myMessageContent.text = messageItem.content
+                    itemView.myAttachmentsContainer.removeAllViews()
                     if (messageItem.attachments.isNotEmpty()) {
                         setupAttachments(itemView.myAttachmentsContainer, messageItem.attachments)
-                    } else {
-                        itemView.myAttachmentsContainer.removeAllViews()
                     }
                     setMessageLongClickListener(itemView.myMessageContainer, messageItem)
                 }
@@ -98,10 +97,9 @@ class MessagesAdapter(
                         messageItem.userAvatarUrl,
                         itemView.userAvatar
                     )
+                    itemView.attachmentsContainer.removeAllViews()
                     if (messageItem.attachments.isNotEmpty()) {
                         setupAttachments(itemView.attachmentsContainer, messageItem.attachments)
-                    } else {
-                        itemView.attachmentsContainer.removeAllViews()
                     }
                     setMessageLongClickListener(itemView.messageContainer, messageItem)
                 }
