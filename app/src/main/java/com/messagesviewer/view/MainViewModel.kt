@@ -77,9 +77,9 @@ class MainViewModel : ViewModel() {
             userName = user.name,
             userAvatarUrl = user.avatarUrl,
             content = message.content,
-            attachments = message.attachments.map {
+            attachments = message.attachments?.map {
                 mapToAttachmentItem(it)
-            }
+            } ?: ArrayList()
         )
 
     private fun mapToAttachmentItem(it: Attachment) =

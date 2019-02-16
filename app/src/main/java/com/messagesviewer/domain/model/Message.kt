@@ -4,5 +4,5 @@ data class Message(
     val id: Long,
     val userId: Long,
     val content: String,
-    val attachments: List<Attachment>
+    val attachments: List<Attachment>? = ArrayList()
 )

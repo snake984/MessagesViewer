@@ -7,5 +7,5 @@ import java.io.InputStream
 
 interface UserRepository {
     suspend fun fetchUsers(): Deferred<List<User>>
-    suspend fun importUsers(source: InputStream): Job
+    suspend fun importUsers(users : List<User>): Job
 }

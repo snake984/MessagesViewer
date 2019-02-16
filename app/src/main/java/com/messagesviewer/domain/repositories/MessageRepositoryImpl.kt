@@ -5,13 +5,10 @@ import com.messagesviewer.domain.model.Message
 import com.messagesviewer.remote.db.dao.MessageDao
 import com.messagesviewer.remote.db.dao.MessageDao_Impl
 import com.messagesviewer.remote.db.model.MessageEntity
-import com.messagesviewer.remote.util.LocalSourceHelper
 import kotlinx.coroutines.*
-import java.io.InputStream
 
 class MessageRepositoryImpl : MessageRepository {
 
-    private val localSourceHelper = LocalSourceHelper()
     private val messageDao: MessageDao = MessageDao_Impl(MessagesViewerApplication.database)
     private val attachmentRepository: AttachmentRepository = AttachmentRepositoryImpl()
     private var currentPage = 0
@@ -29,15 +26,17 @@ class MessageRepositoryImpl : MessageRepository {
                 }.also { currentPage++ }
         }
 
-    override suspend fun importMessages(source: InputStream): Job =
+    override suspend fun importMessages(messages: List<Message>): Job =
         CoroutineScope(Dispatchers.IO).launch {
-            localSourceHelper.parseMessages(source)
-                .forEach {
-                    messageDao.saveMessage(mapMessageToEntity(it))
-                    attachmentRepository.saveAttachments(
-                        it.id,
-                        it.attachments
-                    )
+            messages
+                .forEach { message ->
+                    messageDao.saveMessage(mapMessageToEntity(message))
+                    message.attachments?.let {
+                        attachmentRepository.saveAttachments(
+                            message.id,
+                            it
+                        )
+                    }
                 }
         }
 

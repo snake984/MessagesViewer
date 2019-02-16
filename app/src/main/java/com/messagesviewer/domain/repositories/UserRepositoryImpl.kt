@@ -5,12 +5,9 @@ import com.messagesviewer.domain.model.User
 import com.messagesviewer.remote.db.dao.UserDao
 import com.messagesviewer.remote.db.dao.UserDao_Impl
 import com.messagesviewer.remote.db.model.UserEntity
-import com.messagesviewer.remote.util.LocalSourceHelper
 import kotlinx.coroutines.*
-import java.io.InputStream
 
 class UserRepositoryImpl : UserRepository {
-    private val localSourceHelper = LocalSourceHelper()
     private val userDao: UserDao = UserDao_Impl(MessagesViewerApplication.database)
 
     override suspend fun fetchUsers(): Deferred<List<User>> =
@@ -25,10 +22,10 @@ class UserRepositoryImpl : UserRepository {
                 }
         }
 
-    override suspend fun importUsers(source: InputStream) =
+    override suspend fun importUsers(users: List<User>) =
         CoroutineScope(Dispatchers.IO).launch {
             userDao.saveUsers(
-                localSourceHelper.parseUsers(source)
+                users
                     .map {
                         UserEntity(
                             id = it.id,
