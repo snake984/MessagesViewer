@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.messagesviewer.R
@@ -31,6 +32,9 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         setContentView(R.layout.activity_main)
         messagesRecyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         messagesRecyclerView.adapter = messagesAdapter
+        val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        dividerItemDecoration.setDrawable(resources.getDrawable(R.drawable.messages_margin_divider, null))
+        messagesRecyclerView.addItemDecoration(dividerItemDecoration)
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         observeData()
         mainViewModel.onActivityLaunched(resources.openRawResource(R.raw.data))
