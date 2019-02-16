@@ -1,6 +1,8 @@
 package com.messagesviewer.view
 
 import android.os.Bundle
+import android.os.Parcelable
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
@@ -14,15 +16,16 @@ import com.messagesviewer.R
 import com.messagesviewer.application.SharedPrefHelper
 import com.messagesviewer.view.util.hide
 import com.messagesviewer.view.util.show
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
 
-//TODO - Faire du paging avec la librairie Pager de Google !!
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 
     private val lifecycleRegistry = LifecycleRegistry(this)
 
     override fun getLifecycle(): LifecycleRegistry = lifecycleRegistry
 
+    private val state: State = State(ArrayList())
     private lateinit var mainViewModel: MainViewModel
     private lateinit var sharedPrefHelper: SharedPrefHelper
     private val messagesAdapter = MessagesAdapter()
@@ -30,20 +33,55 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        sharedPrefHelper = SharedPrefHelper()
+
         messagesRecyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         messagesRecyclerView.adapter = messagesAdapter
         val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
         dividerItemDecoration.setDrawable(resources.getDrawable(R.drawable.messages_margin_divider, null))
         messagesRecyclerView.addItemDecoration(dividerItemDecoration)
-        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        sharedPrefHelper = SharedPrefHelper()
+        setPagingListener()
+
         observeData()
-        if (sharedPrefHelper.hasBeenLaunchedOnce(this)) {
-            mainViewModel.fetchMessages()
+
+        if (savedInstanceState == null) {
+            if (sharedPrefHelper.hasBeenLaunchedOnce(this)) {
+                mainViewModel.fetchMessages()
+            } else {
+                mainViewModel.onFirstLaunch(resources.openRawResource(R.raw.data))
+                sharedPrefHelper.setFirstLaunchPref(this)
+            }
         } else {
-            mainViewModel.onFirstLaunch(resources.openRawResource(R.raw.data))
-            sharedPrefHelper.setFirstLaunchPref(this)
+            val state = savedInstanceState.getParcelable(STATE) as State
+            if (state.messages.isNotEmpty()) {
+                messagesAdapter.addMessages(state.messages)
+                emptyMessagesText.hide()
+            }
         }
+    }
+
+    private fun setPagingListener() {
+        messagesRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+
+                val linearLayoutManager = messagesRecyclerView.layoutManager as LinearLayoutManager
+                val isLoading = mainViewModel.isLoading.value ?: false
+                val isLastItemReached =
+                    linearLayoutManager.findLastVisibleItemPosition() == linearLayoutManager.itemCount - 1
+                if (isLastItemReached && !isLoading) {
+                    mainViewModel.fetchMessages()
+                }
+                super.onScrolled(recyclerView, dx, dy)
+            }
+        })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putParcelable(STATE, state)
     }
 
     private fun observeData() {
@@ -56,18 +94,24 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         })
 
         mainViewModel.error.observe(this, Observer {
-            //TODO - Better error handling
             Toast.makeText(this, getString(R.string.something_wrong_happened), Toast.LENGTH_SHORT).show()
         })
 
         mainViewModel.messages.observe(this, Observer {
-            //TODO - Fill list with data (don't forget that you get a new page)
             if (it.isNotEmpty()) {
                 emptyMessagesText.hide()
                 messagesAdapter.addMessages(it)
+                state.messages.addAll(it)
             } else if (messagesAdapter.isEmpty()) {
                 emptyMessagesText.show()
             }
         })
+    }
+
+    @Parcelize
+    data class State(val messages: ArrayList<MessageItem>) : Parcelable
+
+    companion object {
+        private const val STATE = "main-activity-state"
     }
 }

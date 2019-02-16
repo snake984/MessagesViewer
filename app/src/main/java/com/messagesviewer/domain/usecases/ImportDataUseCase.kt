@@ -16,7 +16,7 @@ class ImportDataUseCase {
         try {
             val parsedData = localSourceHelper.parseMessages(source)
             userRepository.importUsers(parsedData.users)
-            messageRepository.importMessages(parsedData.messages)
+            messageRepository.importMessages(parsedData.messages.sortedBy { it.id })
             Result.Success
         } catch (e: Exception) {
             e.printStackTrace()

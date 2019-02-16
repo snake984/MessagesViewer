@@ -1,5 +1,6 @@
 package com.messagesviewer.view
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +61,7 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
 
     class MessagesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(messageItem: MessageItem, viewType: Int) {
+            Log.d("MessagesAdapter", "Showing ${messageItem.id} message")
             when (viewType) {
                 MY_MESSAGES_VIEW_TYPE -> {
                     itemView.myUserName.text = itemView.context.getText(R.string.me)
