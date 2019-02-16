@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.messagesviewer.R
 import com.messagesviewer.view.util.PictureHelper
+import kotlinx.android.synthetic.main.attachment_view.view.*
 import kotlinx.android.synthetic.main.my_message_item_view.view.*
 import kotlinx.android.synthetic.main.others_message_item_view.view.*
 
@@ -63,7 +64,9 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                 MY_MESSAGES_VIEW_TYPE -> {
                     itemView.myUserName.text = itemView.context.getText(R.string.me)
                     itemView.myMessageContent.text = messageItem.content
-                    //TODO - Add attachment views to the container if needed
+                    if (messageItem.attachments.isNotEmpty()) {
+                        setupAttachments(itemView.myAttachmentsContainer, messageItem.attachments)
+                    }
                 }
                 OTHERS_MESSAGES_VIEW_TYPE -> {
                     itemView.userName.text = messageItem.userName
@@ -73,7 +76,23 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                         messageItem.userAvatarUrl,
                         itemView.userAvatar
                     )
+                    if (messageItem.attachments.isNotEmpty()) {
+                        setupAttachments(itemView.attachmentsContainer, messageItem.attachments)
+                    }
                 }
+            }
+        }
+
+        private fun setupAttachments(container: ViewGroup, attachments: List<AttachmentItem>) {
+            attachments.forEach {
+                val attachmentView = AttachmentView(itemView.context)
+                attachmentView.attachmentName.text = it.title
+                PictureHelper.setupImageView(
+                    itemView.context,
+                    it.thumbnailUrl,
+                    attachmentView.attachmentImage
+                )
+                container.addView(attachmentView)
             }
         }
     }
