@@ -7,4 +7,5 @@ import kotlinx.coroutines.Job
 interface MessageRepository {
     suspend fun fetchMessages(pageSize: Int): Deferred<List<Message>>
     suspend fun importMessages(messages: List<Message>): Job
+    suspend fun deleteMessage(message: Message): Job
 }

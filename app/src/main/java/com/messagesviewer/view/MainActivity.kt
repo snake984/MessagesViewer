@@ -2,7 +2,6 @@ package com.messagesviewer.view
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
@@ -28,7 +27,14 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     private val state: State = State(ArrayList())
     private lateinit var mainViewModel: MainViewModel
     private lateinit var sharedPrefHelper: SharedPrefHelper
-    private val messagesAdapter = MessagesAdapter()
+    private val messagesAdapter = MessagesAdapter(
+        onMessageLongClick = {
+            mainViewModel.onMessageLongClick(it)
+        },
+        onAttachmentLongClick = {
+            mainViewModel.onAttachmentLongClick(it)
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,6 +111,19 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
             } else if (messagesAdapter.isEmpty()) {
                 emptyMessagesText.show()
             }
+        })
+
+        mainViewModel.messageDeleted.observe(this, Observer {
+            messagesAdapter.removeMessage(it)
+            state.messages.remove(it)
+            if (messagesAdapter.isEmpty())
+                emptyMessagesText.show()
+        })
+
+        mainViewModel.attachmentDeleted.observe(this, Observer { attachmentItem ->
+            messagesAdapter.removeAttachment(attachmentItem)
+            val messageItem = state.messages.find { it.attachments.contains(attachmentItem) }
+            messageItem?.attachments?.remove(attachmentItem)
         })
     }
 

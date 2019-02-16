@@ -16,4 +16,7 @@ abstract class MessageDao {
     open fun saveMessages(messages: List<MessageEntity>) {
         messages.forEach { saveMessage(it) }
     }
+
+    @Query("DELETE FROM messages WHERE id IS :id")
+    abstract fun deleteMessage(id: Long)
 }

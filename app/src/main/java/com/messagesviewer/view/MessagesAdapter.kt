@@ -1,6 +1,5 @@
 package com.messagesviewer.view
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,11 @@ import kotlinx.android.synthetic.main.attachment_view.view.*
 import kotlinx.android.synthetic.main.my_message_item_view.view.*
 import kotlinx.android.synthetic.main.others_message_item_view.view.*
 
-class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>() {
+class MessagesAdapter(
+    val onMessageLongClick: (MessageItem) -> (Unit),
+    val onAttachmentLongClick: (AttachmentItem) -> (Unit)
+) :
+    RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>() {
     private val messages: ArrayList<MessageItem> = ArrayList()
 
     init {
@@ -59,9 +62,23 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
 
     fun isEmpty(): Boolean = itemCount == 0
 
-    class MessagesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun removeMessage(message: MessageItem) {
+        val index = messages.indexOf(message)
+        messages.remove(message)
+        notifyItemRemoved(index)
+    }
+
+    fun removeAttachment(attachmentItem: AttachmentItem) {
+        val messageItem = messages.find { it.attachments.contains(attachmentItem) }
+        messageItem?.let {
+            val index = messages.indexOf(messageItem)
+            messageItem.attachments.remove(attachmentItem)
+            notifyItemChanged(index)
+        }
+    }
+
+    inner class MessagesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(messageItem: MessageItem, viewType: Int) {
-            Log.d("MessagesAdapter", "Showing ${messageItem.id} message")
             when (viewType) {
                 MY_MESSAGES_VIEW_TYPE -> {
                     itemView.myUserName.text = itemView.context.getText(R.string.me)
@@ -71,6 +88,7 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                     } else {
                         itemView.myAttachmentsContainer.removeAllViews()
                     }
+                    setMessageLongClickListener(itemView.myMessageContainer, messageItem)
                 }
                 OTHERS_MESSAGES_VIEW_TYPE -> {
                     itemView.userName.text = messageItem.userName
@@ -85,19 +103,31 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                     } else {
                         itemView.attachmentsContainer.removeAllViews()
                     }
+                    setMessageLongClickListener(itemView.messageContainer, messageItem)
                 }
             }
         }
 
+        private fun setMessageLongClickListener(container: ViewGroup, messageItem: MessageItem) {
+            container.setOnLongClickListener {
+                onMessageLongClick(messageItem)
+                true
+            }
+        }
+
         private fun setupAttachments(container: ViewGroup, attachments: List<AttachmentItem>) {
-            attachments.forEach {
+            attachments.forEach { attachmentItem ->
                 val attachmentView = AttachmentView(itemView.context)
-                attachmentView.attachmentName.text = it.title
+                attachmentView.attachmentName.text = attachmentItem.title
                 PictureHelper.setupImageView(
                     itemView.context,
-                    it.thumbnailUrl,
+                    attachmentItem.thumbnailUrl,
                     attachmentView.attachmentImage
                 )
+                attachmentView.setOnLongClickListener {
+                    onAttachmentLongClick(attachmentItem)
+                    true
+                }
                 container.addView(attachmentView)
             }
         }

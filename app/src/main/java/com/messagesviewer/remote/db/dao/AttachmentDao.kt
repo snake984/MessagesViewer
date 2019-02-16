@@ -19,4 +19,10 @@ abstract class AttachmentDao {
     open fun saveAttachments(attachments: List<AttachmentEntity>) {
         attachments.forEach { saveAttachment(it) }
     }
+
+    @Query("DELETE FROM attachments where id IS :id")
+    abstract fun deleteAttachment(id: String)
+
+    @Query("DELETE FROM attachments where messageId IS :messageId")
+    abstract fun deleteAttachments(messageId: Long)
 }

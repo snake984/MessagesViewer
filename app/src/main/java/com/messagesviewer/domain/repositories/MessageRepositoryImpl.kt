@@ -44,6 +44,14 @@ class MessageRepositoryImpl : MessageRepository {
             }
         }
 
+    override suspend fun deleteMessage(message: Message): Job =
+        runBlocking {
+            launch {
+                messageDao.deleteMessage(message.id)
+                attachmentRepository.deleteAttachments(message)
+            }
+        }
+
     private fun mapMessageToEntity(message: Message): MessageEntity =
         MessageEntity(
             id = message.id,

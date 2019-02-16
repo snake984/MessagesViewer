@@ -10,5 +10,5 @@ data class MessageItem(
     val userName: String,
     val userAvatarUrl: String,
     val content: String,
-    val attachments: List<AttachmentItem>
+    val attachments: ArrayList<AttachmentItem>
 ) : Parcelable
