@@ -11,12 +11,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.messagesviewer.R
+import com.messagesviewer.application.SharedPrefHelper
 import com.messagesviewer.view.util.hide
 import com.messagesviewer.view.util.show
 import kotlinx.android.synthetic.main.activity_main.*
 
-//TODO - Faire le layout de l'activity avec toolbar et recyclerview dedans
-//TODO - Faire le layout de chaque item (avatar + message + view qui contient l'attachment)
 //TODO - Faire du paging avec la librairie Pager de Google !!
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 
@@ -25,6 +24,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     override fun getLifecycle(): LifecycleRegistry = lifecycleRegistry
 
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var sharedPrefHelper: SharedPrefHelper
     private val messagesAdapter = MessagesAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +36,14 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         dividerItemDecoration.setDrawable(resources.getDrawable(R.drawable.messages_margin_divider, null))
         messagesRecyclerView.addItemDecoration(dividerItemDecoration)
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        sharedPrefHelper = SharedPrefHelper()
         observeData()
-        mainViewModel.onActivityLaunched(resources.openRawResource(R.raw.data))
+        if (sharedPrefHelper.hasBeenLaunchedOnce(this)) {
+            mainViewModel.fetchMessages()
+        } else {
+            mainViewModel.onFirstLaunch(resources.openRawResource(R.raw.data))
+            sharedPrefHelper.setFirstLaunchPref(this)
+        }
     }
 
     private fun observeData() {

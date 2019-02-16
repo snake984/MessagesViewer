@@ -28,7 +28,7 @@ class MainViewModel : ViewModel() {
     private val importDataUseCase = ImportDataUseCase()
     private val jobs = ArrayList<Job>()
 
-    fun onActivityLaunched(dataSourceFromRawFile: InputStream) {
+    fun onFirstLaunch(dataSourceFromRawFile: InputStream) {
         dispose()
         jobs.add(CoroutineScope(Dispatchers.IO).launch {
             _isLoading.postValue(true)
@@ -45,12 +45,12 @@ class MainViewModel : ViewModel() {
     }
 
 
-    //TODO - Ajouter les coroutines Scopes dans les jobs
     //TODO - Ajouter l'observation des live data dans l'activity et ne pas oublier de lancer le paging dans l'adapter
     //TODO - Penser que chaque nouveau résultat va aller chercher une nouvelle page
     //TODO - Prier pour que la BDD ne crash pas quand on dépasse l'offset ou limit
-    private fun fetchMessages() {
+    fun fetchMessages() {
         jobs.add(CoroutineScope(Dispatchers.IO).launch {
+            _isLoading.postValue(true)
             val result = fetchMessagesUseCase.fetchMessages()
 
             _isLoading.postValue(false)

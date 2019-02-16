@@ -66,6 +66,8 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                     itemView.myMessageContent.text = messageItem.content
                     if (messageItem.attachments.isNotEmpty()) {
                         setupAttachments(itemView.myAttachmentsContainer, messageItem.attachments)
+                    } else {
+                        itemView.myAttachmentsContainer.removeAllViews()
                     }
                 }
                 OTHERS_MESSAGES_VIEW_TYPE -> {
@@ -78,6 +80,8 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesAdapter.MessagesViewHolder>
                     )
                     if (messageItem.attachments.isNotEmpty()) {
                         setupAttachments(itemView.attachmentsContainer, messageItem.attachments)
+                    } else {
+                        itemView.attachmentsContainer.removeAllViews()
                     }
                 }
             }
