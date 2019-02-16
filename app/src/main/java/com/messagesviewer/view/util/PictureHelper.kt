@@ -8,7 +8,7 @@ class PictureHelper {
     companion object {
         fun setupImageView(context: Context, url: String, imageView: ImageView) =
             Glide.with(context)
-                .asDrawable()
+                .asBitmap()
                 .load(url)
                 .into(imageView)
     }
