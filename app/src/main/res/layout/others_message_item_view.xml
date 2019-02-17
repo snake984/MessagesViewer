@@ -45,5 +45,6 @@
         android:id="@+id/attachmentsContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="66dp"
         android:orientation="vertical" />
 </LinearLayout>
