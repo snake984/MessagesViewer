@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
             Toast.makeText(this, getString(R.string.something_wrong_happened), Toast.LENGTH_SHORT).show()
         })
 
-        mainViewModel.messages.observe(this, Observer {
+        mainViewModel.items.observe(this, Observer {
             if (it.isNotEmpty()) {
                 emptyMessagesText.hide()
                 messagesAdapter.addMessages(it)
@@ -125,8 +125,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
 
         mainViewModel.attachmentDeleted.observe(this, Observer { attachmentItem ->
             messagesAdapter.removeAttachment(attachmentItem)
-            val messageItem = state.messages.find { it.attachments.contains(attachmentItem) }
-            messageItem?.attachments?.remove(attachmentItem)
+            state.messages.remove(attachmentItem)
         })
     }
 
@@ -153,7 +152,7 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
     }
 
     @Parcelize
-    data class State(val messages: ArrayList<MessageItem>) : Parcelable
+    data class State(val messages: ArrayList<Parcelable>) : Parcelable
 
     companion object {
         private const val STATE = "main-activity-state"

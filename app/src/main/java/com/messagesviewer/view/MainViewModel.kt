@@ -1,5 +1,6 @@
 package com.messagesviewer.view
 
+import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,10 +16,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.InputStream
+import kotlin.coroutines.CoroutineContext
 
-class MainViewModel : ViewModel() {
-    private val _messages = MutableLiveData<List<MessageItem>>()
-    val messages: LiveData<List<MessageItem>> = _messages
+class MainViewModel : ViewModel(), CoroutineScope {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
+
+    private val _items = MutableLiveData<List<Parcelable>>()
+    val items: LiveData<List<Parcelable>> = _items
 
     private val _messageDeleted = MutableLiveData<MessageItem>()
     val messageDeleted: LiveData<MessageItem> = _messageDeleted
@@ -36,11 +42,9 @@ class MainViewModel : ViewModel() {
     private val importDataUseCase = ImportDataUseCase()
     private val deleteMessageUseCase = DeleteMessageUseCase()
     private val deleteAttachmentUseCase = DeleteAttachmentUseCase()
-    private val jobs = ArrayList<Job>()
 
     fun onFirstLaunch(dataSourceFromRawFile: InputStream) {
-        dispose()
-        jobs.add(CoroutineScope(Dispatchers.IO).launch {
+        launch {
             _isLoading.postValue(true)
             val result = importDataUseCase.run(dataSourceFromRawFile)
 
@@ -51,13 +55,12 @@ class MainViewModel : ViewModel() {
                     _error.postValue(result.throwable)
                 }
             }
-        })
+        }
     }
 
 
     fun fetchMessages() {
-        dispose()
-        jobs.add(CoroutineScope(Dispatchers.IO).launch {
+        launch {
             _isLoading.postValue(true)
             val result = fetchMessagesUseCase.run()
 
@@ -66,16 +69,23 @@ class MainViewModel : ViewModel() {
                 is FetchMessagesUseCase.Result.Data -> {
                     val fetchedMessages = result.messages
                     val users = result.users
-                    _messages.postValue(
-                        fetchedMessages.map { message ->
-                            val user = users.find { it.id == message.userId } ?: UNKNOWN_USER
-                            mapToMessageItem(message, user)
+                    val mappedItems = ArrayList<Parcelable>()
+                    fetchedMessages.forEach { message ->
+                        mappedItems.add(mapToMessageItem(
+                            message,
+                            users.find { it.id == message.userId } ?: UNKNOWN_USER))
+
+                        message.attachments?.let {
+                            it.forEach { attachment ->
+                                mappedItems.add(mapToAttachmentItem(attachment, message.userId))
+                            }
                         }
-                    )
+                    }
+                    _items.postValue(mappedItems)
                 }
                 is FetchMessagesUseCase.Result.Error -> _error.postValue(result.throwable)
             }
-        })
+        }
     }
 
     private fun mapToMessageItem(message: Message, user: User) =
@@ -86,13 +96,14 @@ class MainViewModel : ViewModel() {
             userAvatarUrl = user.avatarUrl,
             content = message.content,
             attachments = ArrayList(message.attachments?.map {
-                mapToAttachmentItem(it)
+                mapToAttachmentItem(it, user.id)
             } ?: ArrayList())
         )
 
-    private fun mapToAttachmentItem(attachment: Attachment) =
+    private fun mapToAttachmentItem(attachment: Attachment, userId: Long) =
         AttachmentItem(
             id = attachment.id,
+            userId = userId,
             title = attachment.title,
             url = attachment.url,
             thumbnailUrl = attachment.thumbnailUrl
@@ -116,41 +127,35 @@ class MainViewModel : ViewModel() {
             thumbnailUrl = attachment.thumbnailUrl
         )
 
-    private fun dispose() = with(jobs) {
-        forEach { it.cancel() }
-        clear()
-    }
-
     fun deleteMessage(message: MessageItem) {
-        dispose()
-        jobs.add(
-            CoroutineScope(Dispatchers.IO).launch {
-                _isLoading.postValue(true)
-                val result = deleteMessageUseCase.run(mapToMessage(message))
-                _isLoading.postValue(false)
+        launch {
+            _isLoading.postValue(true)
+            val result = deleteMessageUseCase.run(mapToMessage(message))
+            _isLoading.postValue(false)
 
-                when (result) {
-                    is DeleteMessageUseCase.Result.Success -> _messageDeleted.postValue(message)
-                    is DeleteMessageUseCase.Result.Error -> _error.postValue(result.error)
-                }
+            when (result) {
+                is DeleteMessageUseCase.Result.Success -> _messageDeleted.postValue(message)
+                is DeleteMessageUseCase.Result.Error -> _error.postValue(result.error)
             }
-        )
+        }
     }
 
     fun deleteAttachment(attachment: AttachmentItem) {
-        dispose()
-        jobs.add(
-            CoroutineScope(Dispatchers.IO).launch {
-                _isLoading.postValue(true)
-                val result = deleteAttachmentUseCase.run(mapToAttachment(attachment))
-                _isLoading.postValue(false)
+        CoroutineScope(Dispatchers.IO).launch {
+            _isLoading.postValue(true)
+            val result = deleteAttachmentUseCase.run(mapToAttachment(attachment))
+            _isLoading.postValue(false)
 
-                when (result) {
-                    is DeleteAttachmentUseCase.Result.Success -> _attachmentDeleted.postValue(attachment)
-                    is DeleteAttachmentUseCase.Result.Error -> _error.postValue(result.error)
-                }
+            when (result) {
+                is DeleteAttachmentUseCase.Result.Success -> _attachmentDeleted.postValue(attachment)
+                is DeleteAttachmentUseCase.Result.Error -> _error.postValue(result.error)
             }
-        )
+        }
+    }
+
+    override fun onCleared() {
+        job.cancel()
+        super.onCleared()
     }
 
     companion object {
